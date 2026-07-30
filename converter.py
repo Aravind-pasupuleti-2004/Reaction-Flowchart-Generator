@@ -29,13 +29,13 @@ def _try_opsin(name: str) -> Optional[str]:
                 return smiles
         except ImportError:
             _OPSIN_AVAILABLE = False
-            logger.info("OPSIN not available (requires Java). Falling back to PubChem.")
+            logger.debug("OPSIN not available (requires Java). Falling back to PubChem.")
         except Exception as exc:
             logger.debug(f"OPSIN (legacy) failed for '{name}': {exc}")
     except Exception as exc:
         msg = str(exc)
         if "JVMNotFoundException" in msg or "JAVA_HOME" in msg:
-            logger.info("Java required for pyopsin. Install Java or use SMILES input directly.")
+            logger.debug("Java required for pyopsin. Install Java or use SMILES input directly.")
         else:
             logger.debug(f"pyopsin failed for '{name}': {exc}")
     return None
