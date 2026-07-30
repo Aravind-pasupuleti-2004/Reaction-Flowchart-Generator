@@ -18,12 +18,13 @@ def _fetch_json(url: str, timeout: int = 10) -> Optional[dict]:
 
 
 def name_to_smiles(name: str) -> Optional[str]:
-    url = f"{PUBCHEM_BASE}/compound/name/{urllib.parse.quote(name)}/property/CanonicalSMILES/JSON"
+    from urllib.parse import quote
+    url = f"{PUBCHEM_BASE}/compound/name/{quote(name)}/property/CanonicalSMILES,ConnectivitySMILES/JSON"
     data = _fetch_json(url)
     if data and "PropertyTable" in data:
         props = data["PropertyTable"].get("Properties", [])
         if props:
-            return props[0].get("CanonicalSMILES")
+            return props[0].get("CanonicalSMILES") or props[0].get("ConnectivitySMILES")
     return None
 
 
