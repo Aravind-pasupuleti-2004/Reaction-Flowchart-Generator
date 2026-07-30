@@ -33,7 +33,7 @@ def detect_input_type(text: str) -> str:
             try:
                 from rdkit import RDLogger, Chem
                 rd_logger = RDLogger.logger()
-                rd_logger.setLevel(RDLogger.ERROR)
+                rd_logger.setLevel(RDLogger.FATAL)
                 mol = Chem.MolFromSmiles(text)
                 rd_logger.setLevel(RDLogger.WARNING)
                 if mol is not None:

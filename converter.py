@@ -97,7 +97,7 @@ def convert_to_mol(
                 mol = None
 
         if mol is None:
-            logger.info(f"OPSIN failed for '{input_text}', trying PubChem...")
+            logger.debug(f"OPSIN failed for '{input_text}', trying PubChem...")
             smiles = _try_pubchem(input_text)
             if smiles:
                 mol = Chem.MolFromSmiles(smiles)
