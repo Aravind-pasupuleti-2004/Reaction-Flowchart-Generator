@@ -1,3 +1,5 @@
+import os
+import subprocess
 import traceback
 from typing import Optional, Tuple, Dict
 from rdkit import Chem
@@ -10,20 +12,18 @@ from validation import compute_diagnostics, compare_molecules, generate_report
 _OPSIN_AVAILABLE = None
 
 def _find_java() -> bool:
-    import subprocess, glob, os
-    if os.environ.get("JAVA_HOME"):
+    jh = os.environ.get("JAVA_HOME")
+    if jh and os.path.isfile(os.path.join(jh, "bin", "java")):
         return True
-    candidates = glob.glob("/usr/lib/jvm/java-*-openjdk-*") + glob.glob("/usr/lib/jvm/*")
-    for p in candidates:
-        jbin = os.path.join(p, "bin", "java")
+    for root in ("/usr/lib/jvm", "/usr/lib/jvm/java-17-openjdk-amd64", "/usr/lib/jvm/java-11-openjdk-amd64"):
+        jbin = os.path.join(root, "bin", "java")
         if os.path.isfile(jbin):
-            os.environ["JAVA_HOME"] = p
+            os.environ["JAVA_HOME"] = root
             return True
     try:
-        result = subprocess.run(["which", "java"], capture_output=True, text=True)
-        if result.returncode == 0:
-            jpath = result.stdout.strip()
-            os.environ["JAVA_HOME"] = os.path.dirname(os.path.dirname(jpath))
+        out = subprocess.check_output(["which", "java"], text=True).strip()
+        if out:
+            os.environ["JAVA_HOME"] = os.path.dirname(os.path.dirname(out))
             return True
     except Exception:
         pass
