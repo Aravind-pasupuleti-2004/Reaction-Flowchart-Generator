@@ -24,9 +24,9 @@ from export_flowchart import (
     export_multi_stage_png_bytes, export_multi_stage_docx_bytes,
 )
 
-st.set_page_config(page_title="Reaction Yield Predictor", page_icon="⚗️", layout="wide")
-st.title("Reaction Yield Predictor")
-st.markdown("Enter reaction details manually. IUPAC names are converted to structures and used for AI-based yield prediction.")
+st.set_page_config(page_title="Reaction Flowchart Generator", page_icon="⚗️", layout="wide")
+st.title("Reaction Flowchart Generator")
+st.markdown("Enter reaction details to generate professional flowcharts and Word documents.")
 
 
 def render_molecule_card(mol, label: str, info: dict, cols):
@@ -83,7 +83,7 @@ for i in range(st.session_state.num_stages):
         if already_predicted:
             sd: StageData = st.session_state.stage_data[i]
             rnames = " + ".join(r.name for r in sd.reactants if r.is_valid())
-            st.success(f"**Predicted** — {rnames} → {sd.product.name if sd.product else '?'}")
+            st.success(f"**Processed** — {rnames} → {sd.product.name if sd.product else '?'}")
             if st.button(f"Edit Stage {i + 1}", key=f"edit_stage_{i}"):
                 st.session_state.stage_data[i] = None
                 st.rerun()
@@ -149,7 +149,7 @@ for i in range(st.session_state.num_stages):
 
             st.divider()
             submitted = st.form_submit_button(
-                f"Predict Stage {i + 1}", type="primary", use_container_width=True
+                f"Process Stage {i + 1}", type="primary", use_container_width=True
             )
 
             if submitted:
@@ -426,7 +426,7 @@ if completed_stages:
         pipe_html = build_workflow_html(pipe_steps)
         st.markdown(pipe_html, unsafe_allow_html=True)
 
-    if st.button("Start New Prediction", type="secondary"):
+    if st.button("Start New Process", type="secondary"):
         st.session_state.show_results = False
         st.session_state.stage_data = []
         st.session_state.num_stages = 1

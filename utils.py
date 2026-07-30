@@ -31,8 +31,11 @@ def detect_input_type(text: str) -> str:
         has_rings = "1" in text or "2" in text
         if (has_organic or has_branches or has_rings) and len(text) > 1:
             try:
-                from rdkit import Chem
+                from rdkit import RDLogger, Chem
+                rd_logger = RDLogger.logger()
+                rd_logger.setLevel(RDLogger.ERROR)
                 mol = Chem.MolFromSmiles(text)
+                rd_logger.setLevel(RDLogger.WARNING)
                 if mol is not None:
                     return "smiles"
             except Exception:
