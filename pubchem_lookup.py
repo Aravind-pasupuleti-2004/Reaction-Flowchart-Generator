@@ -1,10 +1,18 @@
 import json
+import re
 import ssl
 import urllib.request
 import urllib.error
+from urllib.parse import quote
 from typing import Optional
 
 PUBCHEM_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
+
+_STEREO_PREFIX = re.compile(r"^\([\d,]*[RSEZ][\d,]*\)[- ]?")
+
+
+def _strip_stereo(name: str) -> str:
+    return _STEREO_PREFIX.sub("", name).strip()
 
 
 def _fetch_json(url: str, timeout: int = 10) -> Optional[dict]:
@@ -17,9 +25,8 @@ def _fetch_json(url: str, timeout: int = 10) -> Optional[dict]:
         return None
 
 
-def name_to_smiles(name: str) -> Optional[str]:
-    from urllib.parse import quote
-    url = f"{PUBCHEM_BASE}/compound/name/{quote(name)}/property/CanonicalSMILES,ConnectivitySMILES/JSON"
+def _try_name(name: str, properties: str) -> Optional[str]:
+    url = f"{PUBCHEM_BASE}/compound/name/{quote(name)}/property/{properties}/JSON"
     data = _fetch_json(url)
     if data and "PropertyTable" in data:
         props = data["PropertyTable"].get("Properties", [])
@@ -28,8 +35,18 @@ def name_to_smiles(name: str) -> Optional[str]:
     return None
 
 
+def name_to_smiles(name: str) -> Optional[str]:
+    result = _try_name(name, "CanonicalSMILES,ConnectivitySMILES")
+    if result:
+        return result
+    stripped = _strip_stereo(name)
+    if stripped != name:
+        return _try_name(stripped, "CanonicalSMILES,ConnectivitySMILES")
+    return None
+
+
 def name_to_inchi(name: str) -> Optional[str]:
-    url = f"{PUBCHEM_BASE}/compound/name/{urllib.parse.quote(name)}/property/InChI/JSON"
+    url = f"{PUBCHEM_BASE}/compound/name/{quote(name)}/property/InChI/JSON"
     data = _fetch_json(url)
     if data and "PropertyTable" in data:
         props = data["PropertyTable"].get("Properties", [])
@@ -39,7 +56,7 @@ def name_to_inchi(name: str) -> Optional[str]:
 
 
 def name_to_info(name: str) -> Optional[dict]:
-    url = f"{PUBCHEM_BASE}/compound/name/{urllib.parse.quote(name)}/property/MolecularFormula,MolecularWeight,CanonicalSMILES,InChI/JSON"
+    url = f"{PUBCHEM_BASE}/compound/name/{quote(name)}/property/MolecularFormula,MolecularWeight,CanonicalSMILES,InChI/JSON"
     data = _fetch_json(url)
     if data and "PropertyTable" in data:
         props = data["PropertyTable"].get("Properties", [])
