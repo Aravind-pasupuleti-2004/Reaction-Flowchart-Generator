@@ -166,10 +166,13 @@ for i in range(st.session_state.num_stages):
                 with st.spinner(f"Converting IUPAC names for Stage {i + 1}..."):
                     reactants = []
                     for j, rname in enumerate(reactant_names):
-                        if rname.strip():
-                            r = process_reactant(rname.strip())
-                            r.equivalents = st.session_state.get(f"stage_{i}_eq_{j}", 1.0)
-                            reactants.append(r)
+                        eq = st.session_state.get(f"stage_{i}_eq_{j}", 1.0)
+                        for part in rname.split("+"):
+                            part = part.strip()
+                            if part:
+                                r = process_reactant(part)
+                                r.equivalents = eq
+                                reactants.append(r)
                     product = process_product(product_name.strip())
 
                 conversion_ok = True
