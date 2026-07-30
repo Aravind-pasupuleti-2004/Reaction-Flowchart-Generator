@@ -29,7 +29,7 @@ def _try_opsin(name: str) -> Optional[str]:
                 return smiles
         except ImportError:
             _OPSIN_AVAILABLE = False
-            logger.debug("OPSIN not available (requires Java). Falling back to PubChem.")
+            logger.info("OPSIN not available. Install pyopsin (requires Java): pip install pyopsin")
         except Exception as exc:
             logger.debug(f"OPSIN (legacy) failed for '{name}': {exc}")
     except Exception as exc:
