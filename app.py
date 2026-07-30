@@ -12,7 +12,6 @@ from reaction_form import (
     process_reactant, process_product,
 )
 from validation import compute_diagnostics
-from pipeline_analyzer import run_pipeline_diagnostics, summarize_pipeline_report
 from workflow_chart import build_workflow_html, make_steps_from_status, DEFAULT_STEPS
 from reaction_flowchart import build_reaction_scheme_html
 from export_flowchart import (
@@ -325,6 +324,13 @@ if completed_stages:
     export_data = [sd.to_export_dict() for sd in completed_stages]
     is_multi = len(export_data) > 1
 
+    def _safe_export(fn, *args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except Exception as e:
+            st.error(f"Export failed: {e}")
+            return b""
+
     if not is_multi:
         sd = completed_stages[0]
         rxn_reactants = [
@@ -345,28 +351,28 @@ if completed_stages:
         with export_cols[0]:
             st.download_button(
                 label="Download PDF",
-                data=export_pdf_bytes(rxn_reactants, rxn_product, rxn_conditions),
+                data=_safe_export(export_pdf_bytes, rxn_reactants, rxn_product, rxn_conditions),
                 file_name="reaction_flowchart.pdf", mime="application/pdf",
                 use_container_width=True,
             )
         with export_cols[1]:
             st.download_button(
                 label="Download PNG",
-                data=export_png_bytes(rxn_reactants, rxn_product, rxn_conditions, dpi=300),
+                data=_safe_export(export_png_bytes, rxn_reactants, rxn_product, rxn_conditions, dpi=300),
                 file_name="reaction_flowchart.png", mime="image/png",
                 use_container_width=True,
             )
         with export_cols[2]:
             st.download_button(
                 label="Download SVG",
-                data=export_svg_bytes(rxn_reactants, rxn_product, rxn_conditions),
+                data=_safe_export(export_svg_bytes, rxn_reactants, rxn_product, rxn_conditions),
                 file_name="reaction_flowchart.svg", mime="image/svg+xml",
                 use_container_width=True,
             )
         with export_cols[3]:
             st.download_button(
                 label="Download Word",
-                data=export_docx_bytes(rxn_reactants, rxn_product, rxn_conditions),
+                data=_safe_export(export_docx_bytes, rxn_reactants, rxn_product, rxn_conditions),
                 file_name="reaction_flowchart.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 use_container_width=True,
@@ -376,7 +382,7 @@ if completed_stages:
         with export_cols[0]:
             st.download_button(
                 label="Download PDF",
-                data=export_multi_stage_pdf_bytes(export_data),
+                data=_safe_export(export_multi_stage_pdf_bytes, export_data),
                 file_name="reaction_flowchart.pdf",
                 mime="application/pdf",
                 use_container_width=True,
@@ -384,7 +390,7 @@ if completed_stages:
         with export_cols[1]:
             st.download_button(
                 label="Download PNG",
-                data=export_multi_stage_png_bytes(export_data, dpi=300),
+                data=_safe_export(export_multi_stage_png_bytes, export_data, dpi=300),
                 file_name="reaction_flowchart.png",
                 mime="image/png",
                 use_container_width=True,
@@ -392,7 +398,7 @@ if completed_stages:
         with export_cols[2]:
             st.download_button(
                 label="Download SVG",
-                data=export_multi_stage_svg_bytes(export_data),
+                data=_safe_export(export_multi_stage_svg_bytes, export_data),
                 file_name="reaction_flowchart.svg",
                 mime="image/svg+xml",
                 use_container_width=True,
@@ -400,7 +406,7 @@ if completed_stages:
         with export_cols[3]:
             st.download_button(
                 label="Download Word",
-                data=export_multi_stage_docx_bytes(export_data),
+                data=_safe_export(export_multi_stage_docx_bytes, export_data),
                 file_name="reaction_flowchart.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 use_container_width=True,

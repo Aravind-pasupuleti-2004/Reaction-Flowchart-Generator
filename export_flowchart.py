@@ -472,31 +472,6 @@ def export_structure_png_bytes(mol, label="", info=None, dpi=300) -> bytes:
 
 # ── JPEG export ──────────────────────────────────────────────────
 
-def export_jpeg_bytes(
-    reactants, product, conditions,
-    dpi=300,
-) -> bytes:
-    png = export_png_bytes(reactants, product, conditions, dpi)
-    from PIL import Image
-    buf = io.BytesIO(png)
-    img = Image.open(buf)
-    out = io.BytesIO()
-    img = img.convert("RGB")
-    img.save(out, format="JPEG", quality=95)
-    return out.getvalue()
-
-
-def export_structure_jpeg_bytes(mol, label="", info=None, dpi=300) -> bytes:
-    png = export_structure_png_bytes(mol, label, info, dpi)
-    from PIL import Image
-    buf = io.BytesIO(png)
-    img = Image.open(buf)
-    out = io.BytesIO()
-    img = img.convert("RGB")
-    img.save(out, format="JPEG", quality=95)
-    return out.getvalue()
-
-
 # ── DOCX export (editable text + tables, matching reference format) ──
 
 def _set_reference_page(doc):
@@ -869,17 +844,6 @@ def export_multi_stage_pdf_bytes(stages: List[Dict]) -> bytes:
 def export_multi_stage_png_bytes(stages: List[Dict], dpi=300) -> bytes:
     pdf = export_multi_stage_pdf_bytes(stages)
     return _pdf_to_png_bytes(pdf, dpi)
-
-
-def export_multi_stage_jpeg_bytes(stages: List[Dict], dpi=300) -> bytes:
-    png = export_multi_stage_png_bytes(stages, dpi)
-    from PIL import Image
-    buf = io.BytesIO(png)
-    img = Image.open(buf)
-    out = io.BytesIO()
-    img = img.convert("RGB")
-    img.save(out, format="JPEG", quality=95)
-    return out.getvalue()
 
 
 def export_multi_stage_docx_bytes(stages: List[Dict]) -> bytes:

@@ -66,14 +66,3 @@ def mol_to_molfile(mol: Chem.Mol) -> Optional[str]:
     except Exception:
         return None
 
-
-def save_png(mol: Chem.Mol, filepath: str, size: tuple = (600, 400)) -> bool:
-    try:
-        data = mol_to_png_bytes(mol, size)
-        if data:
-            with open(filepath, "wb") as f:
-                f.write(data)
-            return True
-        return False
-    except Exception:
-        return False
