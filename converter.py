@@ -87,25 +87,20 @@ def convert_to_mol(
             return None, "inchikey", "Invalid InChIKey"
 
     elif detected_type == "iupac_or_common":
-        smiles = _try_opsin(input_text)
+        smiles = _try_pubchem(input_text)
         if smiles:
             mol = Chem.MolFromSmiles(smiles)
             if mol:
-                detected_type = "iupac"
+                detected_type = "common_name"
                 status = "success"
-            else:
-                mol = None
 
         if mol is None:
-            logger.debug(f"OPSIN failed for '{input_text}', trying PubChem...")
-            smiles = _try_pubchem(input_text)
+            smiles = _try_opsin(input_text)
             if smiles:
                 mol = Chem.MolFromSmiles(smiles)
                 if mol:
-                    detected_type = "common_name"
+                    detected_type = "iupac"
                     status = "success"
-                else:
-                    mol = None
 
         if mol is None:
             status = "failed"

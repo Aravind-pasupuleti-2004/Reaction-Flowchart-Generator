@@ -3,4 +3,3 @@ libxext6
 libxcb1
 libx11-6
 libgl1-mesa-glx
-openjdk-17-jre-headless
