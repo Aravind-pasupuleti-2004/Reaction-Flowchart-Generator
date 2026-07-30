@@ -9,9 +9,33 @@ from validation import compute_diagnostics, compare_molecules, generate_report
 
 _OPSIN_AVAILABLE = None
 
+def _find_java() -> bool:
+    import subprocess, glob, os
+    if os.environ.get("JAVA_HOME"):
+        return True
+    candidates = glob.glob("/usr/lib/jvm/java-*-openjdk-*") + glob.glob("/usr/lib/jvm/*")
+    for p in candidates:
+        jbin = os.path.join(p, "bin", "java")
+        if os.path.isfile(jbin):
+            os.environ["JAVA_HOME"] = p
+            return True
+    try:
+        result = subprocess.run(["which", "java"], capture_output=True, text=True)
+        if result.returncode == 0:
+            jpath = result.stdout.strip()
+            os.environ["JAVA_HOME"] = os.path.dirname(os.path.dirname(jpath))
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def _try_opsin(name: str) -> Optional[str]:
     global _OPSIN_AVAILABLE
     if _OPSIN_AVAILABLE is False:
+        return None
+    if not _find_java():
+        _OPSIN_AVAILABLE = False
         return None
     try:
         import pyopsin
@@ -29,13 +53,12 @@ def _try_opsin(name: str) -> Optional[str]:
                 return smiles
         except ImportError:
             _OPSIN_AVAILABLE = False
-            logger.info("OPSIN not available. Install pyopsin (requires Java): pip install pyopsin")
         except Exception as exc:
             logger.debug(f"OPSIN (legacy) failed for '{name}': {exc}")
     except Exception as exc:
         msg = str(exc)
         if "JVMNotFoundException" in msg or "JAVA_HOME" in msg:
-            logger.debug("Java required for pyopsin. Install Java or use SMILES input directly.")
+            logger.debug(f"JVM not found for pyopsin: {exc}")
         else:
             logger.debug(f"pyopsin failed for '{name}': {exc}")
     return None
